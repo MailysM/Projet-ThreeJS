@@ -1,54 +1,61 @@
 ////Class Cube
 class Cube {
-    constructor(height, width, mesh) {
+    constructor(height, width, mesh, id) {
 		this._height = height;
 		this._width = width;
-		// this._i = i;
-		// this._j = j;
         this._hasBomb = false;
         this._mesh = mesh;
         this._numberNeighboorBomb = 0;
+        this._id = id;
 	}
-
-    getBomb(){return this._hasBomb;}
 
     setBomb(hasBomb){
         this._hasBomb = hasBomb;
     }
 
-    getMesh(){return this._mesh};
+    getMesh(){return this._mesh;}
 
-    addBombNeighboor(){this._numberNeighboorBomb++}
+    addBombNeighboor(){this._numberNeighboorBomb++;}
+
+    getId(){return this._id;}
 
 }
 function createMap(size,length,pas){
     let totalLength = size*length+(size-1)*pas;
-    for (let i = 0; i < size; i+=length) {
-        for(let j = 0; j < size; j+=length){
-            cubes[i,j] = new Cube(height,width,new THREE.Mesh(geometry, material));
-            cubes[i,j].getMesh().position.x =  i + i*pas - Math.floor(totalLength/2);
-            cubes[i,j].getMesh().position.y = j + j*pas;
-            //cubes[i,j].addEventListener( 'mouseover', onPointerMove );
-            scene.add(cubes[i,j].getMesh());
+    for (let i = 0; i < size; i++) {
+        for(let j = 0; j < size; j++){
+            const material = new THREE.MeshPhongMaterial({
+                color:  0xFFC300  ,
+                side: THREE.DoubleSide
+            });
+            const object = new THREE.Mesh(geometry, material);
+            object.position.x =  i + i*pas - Math.floor(totalLength/2);
+            object.position.y = j + j*pas;
+            scene.add(object);
+            cubes[i].push(new Cube(height,width,object, object.id));
+            domEvents.addEventListener(object, 'click', function(){selectCube(cubes[i][j])}, false)
+            
         }
     }
-    let rectangle = new THREE.Mesh(geometryRect,materialPlateau);
-    rectangle.position.x = pas -pas/3;
-    rectangle.position.y = pas + Math.floor(totalLength/2);
-    rectangle.position.z = -0.5;
-    scene.add(rectangle);
+    // let rectangle = new THREE.Mesh(geometryRect,materialPlateau);
+    // rectangle.position.x = pas -pas/3;
+    // rectangle.position.y = pas + Math.floor(totalLength/2);
+    // rectangle.position.z = -0.5;
+    // scene.add(rectangle);
 
 }
 
-function setBombs(size){
+function setBombsMap(size, arrayCubes){
     const totalNumberBombs = Math.floor(size*size/8) + 1;
     let compteur = 0;
     while(compteur < totalNumberBombs){
-        let randomI = getRandomInt(0,size);
-        let randomJ = getRandomInt(0,size);
-        if(cubes[randomI,randomJ].getBomb()==false){
-            cubes[randomI,randomJ].setBomb(true);
-            setNeighboorBomb(randomI,randomJ);
+        console.log(compteur)
+        let randomI = getRandomInt(0,size-1);
+        let randomJ = getRandomInt(0,size-1);
+        
+        if(arrayCubes[randomI][randomJ]._hasBomb==false){
+            arrayCubes[randomI][randomJ].setBomb(true);
+            setNeighboorBomb(randomI,randomJ,arrayCubes);
             compteur++;
         } 
     }
@@ -56,15 +63,21 @@ function setBombs(size){
 
 
 function onPointerMove( event ) {
-
+    event.preventDefault();
 	// calculate pointer position in normalized device coordinates
 	// (-1 to +1) for both components
-    console.log("ok");
 	pointer.x = ( event.clientX / window.innerWidth ) * 2 - 1;
 	pointer.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 
 
 
+}
+
+function selectCube( cube ) {
+    if(cube._hasBomb){alert("perdu")}
+    else{
+        console.log(cube._numberNeighboorBomb);
+    }
 }
 
 function getRandomInt(min, max) {
@@ -85,30 +98,39 @@ Array.matrix = function(numrows, numcols, initial) {
     return arr;
 }
 
-function setNeighboorBomb(i,j){
+function setNeighboorBomb(i,j,arrayCubes){
 
     if(i>1){
-        cubes[i-1,j].addBombNeighboor();
+        arrayCubes[i-1][j].addBombNeighboor();
         if(j>1){
-            cubes[i-1,j-1].addBombNeighboor();
-            cubes[i,j-1].addBombNeighboor();
+            arrayCubes[i-1][j-1].addBombNeighboor();
+            arrayCubes[i][j-1].addBombNeighboor();
         }
-        if(j<size){
-            cubes[i-1,j+1].addBombNeighboor();
-            cubes[i,j+1].addBombNeighboor();
+        if(j<size-1){
+            arrayCubes[i-1][j+1].addBombNeighboor();
+            arrayCubes[i][j+1].addBombNeighboor();
         }
     }
 
-    if(i<size){
-        cubes[i+1,j].addBombNeighboor();
+    if(i<size-1){
+        arrayCubes[i+1][j].addBombNeighboor();
         if(j>1){
-            cubes[i+1,j-1].addBombNeighboor();
+            arrayCubes[i+1][j-1].addBombNeighboor();
         }
-        if(j<size){
-            cubes[i+1,j+1].addBombNeighboor();
+        if(j<size-1){
+            arrayCubes[i+1][j+1].addBombNeighboor();
         }
     }
 
+}
+
+function getCubeById(id){
+    for(let i = 0; i<size ; i++){
+        for(let j = 0 ; j<size ; j++){
+            if(cubes[i][j].getId()== id) return cubes[i][j];
+        }
+    }
+    return false;
 }
 
 
@@ -123,6 +145,7 @@ const pas = 0.5;
 const height = 1;
 const width = 1;
 
+let INTERSECTED;
 const scene = new THREE.Scene();
 scene.background = new THREE.Color( 0xcccccc );;
 
@@ -167,16 +190,16 @@ scene.add(spotLight);
 const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
 
+//DomEvents
+var domEvents	= new THREEx.DomEvents(camera, renderer.domElement)
+
+
 renderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
 
 
 //cube
 const geometry = new THREE.BoxGeometry();
-const material = new THREE.MeshPhongMaterial({
-    color:  0xFFC300  ,
-    side: THREE.DoubleSide
-});
 
 //plateau
 const sizePlateau = size*length+(size-1)*pas+2*pas;
@@ -187,46 +210,67 @@ const materialPlateau = new THREE.MeshLambertMaterial({
 const geometryRect = new THREE.BoxGeometry(sizePlateau,sizePlateau,0.1);
 
 //Cubes
-let cubes = Array.matrix(size,size,0);
+const cubes = [[],[],[],[]];
+
+
+// //Load GLTF
+// const loader = new GLTFLoader();
+
+// loader.load( 'path/to/model.glb', function ( gltf ) {
+
+// 	scene.add( gltf.scene );
+
+// }, undefined, function ( error ) {
+
+// 	console.error( error );
+
+// } );
 
 
 
 const render = function () {
     requestAnimationFrame( render );
 
-    // // update the picking ray with the camera and pointer position
-	// raycaster.setFromCamera( pointer, camera );
+    // update the picking ray with the camera and pointer position
+	raycaster.setFromCamera( pointer, camera );
 
-	// // calculate objects intersecting the picking ray
-	// const intersects = raycaster.intersectObjects( scene.children );
+	// calculate objects intersecting the picking ray
+	const intersects = raycaster.intersectObjects( scene.children );
 
-    // if ( intersects.length > 0 ) {
 
-    //     if ( INTERSECTED != intersects[ 0 ].object ) {
+    if ( intersects.length > 0 ) {
 
-    //         if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+        if ( INTERSECTED != intersects[ 0 ].object ) {
 
-    //         INTERSECTED = intersects[ 0 ].object;
-    //         INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
-    //         INTERSECTED.material.emissive.setHex( 0xff0000 );
 
-    //     }
+            if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
 
-    // } else {
+            
+            INTERSECTED = intersects[ 0 ].object;
+            INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
+            INTERSECTED.material.emissive.setHex( 0xff0000 );
 
-    //     if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+        }
 
-    //     INTERSECTED = null;
+    } else {
 
-    // }
+        if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+
+        INTERSECTED = null;
+
+    }
     controls.update();
 
     renderer.render(scene, camera);
 };
 
 //Initialisation
+document.addEventListener( 'mousemove', onPointerMove );
+
 createMap(size,length,pas);
-setBombs(size);
+setBombsMap(size,cubes);
+
+console.log(cubes);
 render();
 
 
