@@ -1,3 +1,4 @@
+
 ////Class Cube
 class Cube {
     constructor(height, width, mesh, id) {
@@ -211,21 +212,6 @@ const geometryRect = new THREE.BoxGeometry(sizePlateau,sizePlateau,0.1);
 
 //Cubes
 const cubes = [[],[],[],[]];
-
-
-// //Load GLTF
-// const loader = new GLTFLoader();
-
-// loader.load( 'path/to/model.glb', function ( gltf ) {
-
-// 	scene.add( gltf.scene );
-
-// }, undefined, function ( error ) {
-
-// 	console.error( error );
-
-// } );
-
 
 
 const render = function () {
