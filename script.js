@@ -1,3 +1,4 @@
+const loader = new THREE.FontLoader();
 
 ////Class Cube
 class Cube {
@@ -38,11 +39,12 @@ function createMap(size,length,pas){
             
         }
     }
-    // let rectangle = new THREE.Mesh(geometryRect,materialPlateau);
-    // rectangle.position.x = pas -pas/3;
-    // rectangle.position.y = pas + Math.floor(totalLength/2);
-    // rectangle.position.z = -0.5;
-    // scene.add(rectangle);
+    let rectangle = new THREE.Mesh(geometryRect,materialPlateau);
+    rectangle.position.x = pas -pas/3;
+    rectangle.position.y = pas + Math.floor(totalLength/2);
+    rectangle.position.z = -0.5;
+    rectangle.name = "rectangle";
+    scene.add(rectangle);
 
 }
 
@@ -77,7 +79,29 @@ function onPointerMove( event ) {
 function selectCube( cube ) {
     if(cube._hasBomb){alert("perdu")}
     else{
-        console.log(cube._numberNeighboorBomb);
+        let textGeo;
+        let textNumber = cube._numberNeighboorBomb.toString();
+        console.log(textNumber);
+        loader.load( './ressources/font/droid_sans_mono_regular.typeface.json', function ( font ) {
+
+            textGeo = new THREE.TextGeometry( textNumber, {
+                font: font,
+                size: 1,
+                height: 0.1,
+                // curveSegments: 12,
+                // bevelEnabled: true,
+                // bevelThickness: 10,
+                // bevelSize: 8,
+                // bevelOffset: 0,
+                // bevelSegments: 5
+            } );
+            textGeo.computeBoundingBox();
+            //const textMesh = new THREE.Mesh( textGeo, materialDigit );
+            cube._mesh.geometry.dispose();
+            cube._mesh.geometry = textGeo;
+
+        } );
+        
     }
 }
 
@@ -101,9 +125,9 @@ Array.matrix = function(numrows, numcols, initial) {
 
 function setNeighboorBomb(i,j,arrayCubes){
 
-    if(i>1){
+    if(i>0){
         arrayCubes[i-1][j].addBombNeighboor();
-        if(j>1){
+        if(j>0){
             arrayCubes[i-1][j-1].addBombNeighboor();
             arrayCubes[i][j-1].addBombNeighboor();
         }
@@ -115,7 +139,7 @@ function setNeighboorBomb(i,j,arrayCubes){
 
     if(i<size-1){
         arrayCubes[i+1][j].addBombNeighboor();
-        if(j>1){
+        if(j>0){
             arrayCubes[i+1][j-1].addBombNeighboor();
         }
         if(j<size-1){
@@ -228,13 +252,18 @@ const render = function () {
 
         if ( INTERSECTED != intersects[ 0 ].object ) {
 
-
             if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
 
-            
             INTERSECTED = intersects[ 0 ].object;
-            INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
-            INTERSECTED.material.emissive.setHex( 0xff0000 );
+
+            if(INTERSECTED.name == 'rectangle'){
+                INTERSECTED = null;
+            } else{
+                INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
+                INTERSECTED.material.emissive.setHex( 0xff0000 );
+            }
+            
+            
 
         }
 
