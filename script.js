@@ -1,27 +1,6 @@
-const loader = new THREE.FontLoader();
+import {Cube} from "./modules/Cube.js"
 
-////Class Cube
-class Cube {
-    constructor(height, width, mesh, id) {
-		this._height = height;
-		this._width = width;
-        this._hasBomb = false;
-        this._mesh = mesh;
-        this._numberNeighboorBomb = 0;
-        this._id = id;
-	}
-
-    setBomb(hasBomb){
-        this._hasBomb = hasBomb;
-    }
-
-    getMesh(){return this._mesh;}
-
-    addBombNeighboor(){this._numberNeighboorBomb++;}
-
-    getId(){return this._id;}
-
-}
+///Functions
 function createMap(size,length,pas){
     let totalLength = size*length+(size-1)*pas;
     for (let i = 0; i < size; i++) {
@@ -64,6 +43,47 @@ function setBombsMap(size, arrayCubes){
     }
 }
 
+function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min +1)) + min;
+}
+
+function setNeighboorBomb(i,j,arrayCubes){
+
+    if(i>0){
+        arrayCubes[i-1][j].addBombNeighboor();
+        if(j>0){
+            arrayCubes[i-1][j-1].addBombNeighboor();
+            arrayCubes[i][j-1].addBombNeighboor();
+        }
+        if(j<size-1){
+            arrayCubes[i-1][j+1].addBombNeighboor();
+            arrayCubes[i][j+1].addBombNeighboor();
+        }
+    }
+
+    if(i<size-1){
+        arrayCubes[i+1][j].addBombNeighboor();
+        if(j>0){
+            arrayCubes[i+1][j-1].addBombNeighboor();
+        }
+        if(j<size-1){
+            arrayCubes[i+1][j+1].addBombNeighboor();
+        }
+    }
+
+}
+
+
+function getCubeById(id,cubes){
+    for(let i = 0; i<size ; i++){
+        for(let j = 0 ; j<size ; j++){
+            if(cubes[i][j].getId()== id) return cubes[i][j];
+        }
+    }
+    return false;
+}
 
 function onPointerMove( event ) {
     event.preventDefault();
@@ -101,74 +121,32 @@ function selectCube( cube ) {
             cube._mesh.geometry = textGeo;
 
         } );
-        
     }
 }
 
-function getRandomInt(min, max) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min +1)) + min;
-}
-
-Array.matrix = function(numrows, numcols, initial) {
-    var arr = [];
-    for (var i = 0; i < numrows; ++i) {
-        var columns = [];
-        for (var j = 0; j < numcols; ++j) {
-            columns[j] = initial;
-        }
-        arr[i] = columns;
-    }
-    return arr;
-}
-
-function setNeighboorBomb(i,j,arrayCubes){
-
-    if(i>0){
-        arrayCubes[i-1][j].addBombNeighboor();
-        if(j>0){
-            arrayCubes[i-1][j-1].addBombNeighboor();
-            arrayCubes[i][j-1].addBombNeighboor();
-        }
-        if(j<size-1){
-            arrayCubes[i-1][j+1].addBombNeighboor();
-            arrayCubes[i][j+1].addBombNeighboor();
-        }
-    }
-
-    if(i<size-1){
-        arrayCubes[i+1][j].addBombNeighboor();
-        if(j>0){
-            arrayCubes[i+1][j-1].addBombNeighboor();
-        }
-        if(j<size-1){
-            arrayCubes[i+1][j+1].addBombNeighboor();
-        }
-    }
-
-}
-
-function getCubeById(id){
-    for(let i = 0; i<size ; i++){
-        for(let j = 0 ; j<size ; j++){
-            if(cubes[i][j].getId()== id) return cubes[i][j];
-        }
-    }
-    return false;
-}
-
-
-
-//Import modules
-//import {Cube} from "./Cube.js"
-
+//Déclaration des constantes
+const loader = new THREE.FontLoader();
+//Constantes
 //Variables Jeux
 const size = 4;
 const length = 1;
 const pas = 0.5;
 const height = 1;
 const width = 1;
+//cube
+const geometry = new THREE.BoxGeometry();
+//plateau
+const sizePlateau = size*length+(size-1)*pas+2*pas;
+const materialPlateau = new THREE.MeshLambertMaterial({
+    color:  0x581845 ,
+    flatShading: true
+});
+const geometryRect = new THREE.BoxGeometry(sizePlateau,sizePlateau,0.1);
+
+//Cubes
+const cubes = [[],[],[],[]];
+
+
 
 let INTERSECTED;
 const scene = new THREE.Scene();
@@ -221,21 +199,6 @@ var domEvents	= new THREEx.DomEvents(camera, renderer.domElement)
 
 renderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
-
-
-//cube
-const geometry = new THREE.BoxGeometry();
-
-//plateau
-const sizePlateau = size*length+(size-1)*pas+2*pas;
-const materialPlateau = new THREE.MeshLambertMaterial({
-    color:  0x581845 ,
-    flatShading: true
-});
-const geometryRect = new THREE.BoxGeometry(sizePlateau,sizePlateau,0.1);
-
-//Cubes
-const cubes = [[],[],[],[]];
 
 
 const render = function () {
