@@ -1,22 +1,24 @@
+//Import modules
+const Cube = require('./Cube')
+
 //Variables Jeux
 const size = 4;
 const length = 1;
 const pas = 0.5;
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xffffff);
+scene.background = new THREE.Color( 0xcccccc );;
 
 const aspect = window.innerWidth / window.innerHeight;
 const camera = new THREE.PerspectiveCamera( 70,aspect,0.1, 100 );
-
-camera.position.z = 9;
+camera.position.set( 10, 10, 8 );
 
 const renderer = new THREE.WebGLRenderer();
-const controls = new THREE.OrbitControls( camera , renderer.domElement );
+const controls = new THREE.MapControls( camera , renderer.domElement );
 controls.enablePan = true;
 controls.enableZoom = true;
 controls.enableRotate = true;
-controls.enableK
+
 
 controls.keys = {
 	LEFT: 'ArrowLeft', //left arrow
@@ -54,7 +56,7 @@ document.body.appendChild( renderer.domElement );
 
 //cube
 const geometry = new THREE.BoxGeometry();
-const material = new THREE.MeshLambertMaterial({
+const material = new THREE.MeshPhongMaterial({
     color:  0xFFC300  ,
     side: THREE.DoubleSide
 });
@@ -63,7 +65,7 @@ const material = new THREE.MeshLambertMaterial({
 const sizePlateau = size*length+(size-1)*pas+2*pas;
 const materialPlateau = new THREE.MeshLambertMaterial({
     color:  0x581845 ,
-    side: THREE.DoubleSide
+    flatShading: true
 });
 const geometryRect = new THREE.BoxGeometry(sizePlateau,sizePlateau,0.1);
 
@@ -89,6 +91,8 @@ function createMap(size,length,pas){
 
 }
 
+function setBombs
+
 // function onPointerMove( event ) {
 
 // 	// calculate pointer position in normalized device coordinates
@@ -105,6 +109,15 @@ function createMap(size,length,pas){
 
 createMap(size,length,pas);
 
+function animate() {
+
+    requestAnimationFrame( animate );
+
+    controls.update(); // only required if controls.enableDamping = true, or if controls.autoRotate = true
+
+    render();
+
+}
 
 const render = function () {
     requestAnimationFrame( render );
