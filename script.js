@@ -196,6 +196,9 @@ const pointer = new THREE.Vector2();
 //DomEvents
 var domEvents	= new THREEx.DomEvents(camera, renderer.domElement)
 
+//Explosion
+const animation = new explosion.default();
+
 
 renderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
