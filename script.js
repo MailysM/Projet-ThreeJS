@@ -1,4 +1,7 @@
 import {Cube} from "./modules/Cube.js"
+import fragment from "./shader/fragment.glsl";
+import vertex from "./shader/vertexEgg.glsl";
+
 
 ///Functions
 function createMap(size,length,pas){
@@ -254,6 +257,85 @@ setBombsMap(size,cubes);
 console.log(cubes);
 render();
 
+
+
+
+//test oeuf
+function load() {
+    let that = this;
+    let i = 0;
+    let parent;
+    let pos = new THREE.Vector3(0, 0, 0);
+    let poses = [];
+    this.voron = [];
+
+    this.loader.load(
+      "egg-thick.glb",
+      function(gltf) {
+        var bbox = new THREE.Box3().setFromObject(gltf.scene);
+
+        gltf.scene.traverse(function(child) {
+          if (child.name === "Voronoi_Fracture") {
+            if (child.children[0].children.length > 2) {
+              child.children.forEach(f => {
+                f.children.forEach(m => {
+                  that.voron.push(m.clone());
+                });
+              });
+            } else {
+              child.children.forEach(m => {
+                that.voron.push(m.clone());
+              });
+            }
+          }
+        });
+
+        that.geoms = [];
+        that.geoms1 = [];
+        let j = 0;
+        that.voron = that.voron.filter(v => {
+          if (v.isMesh) return false;
+          else {
+            j++;
+            let vtempo = that.processSurface(v, j);
+
+            if (that.inverted) {
+              that.geoms1.push(vtempo.surface);
+              that.geoms.push(vtempo.volume);
+            } else {
+              that.geoms.push(vtempo.surface);
+              that.geoms1.push(vtempo.volume);
+            }
+
+            return true;
+          }
+        });
+
+        let s = THREE.BufferGeometryUtils.mergeBufferGeometries(
+          that.geoms,
+          false
+        );
+        let mesh = new THREE.Mesh(s, that.material);
+        mesh.frustumCulled = false;
+        that.scene.add(mesh);
+
+        let s1 = THREE.BufferGeometryUtils.mergeBufferGeometries(
+          that.geoms1,
+          false
+        );
+        let mesh1 = new THREE.Mesh(s1, that.material1);
+        mesh1.frustumCulled = false;
+        that.scene.add(mesh1);
+        that.onLoad();
+      },
+      undefined,
+      function(e) {
+        console.error(e);
+      }
+    );
+  }
+
+  load();
 
 
 
