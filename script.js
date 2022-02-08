@@ -1,6 +1,5 @@
 import {Cube} from "./modules/Cube.js"
-import fragment from "./shader/fragment.glsl";
-import vertex from "./shader/vertexEgg.glsl";
+import {MiniCube} from "./modules/MiniCube.js"
 
 
 ///Functions
@@ -14,7 +13,7 @@ function createMap(size,length,pas){
             });
             const object = new THREE.Mesh(geometry, material);
             object.position.x =  i + i*pas - Math.floor(totalLength/2);
-            object.position.y = j + j*pas;
+            object.position.y =  j + j*pas;
             scene.add(object);
             cubes[i].push(new Cube(height,width,object, object.id));
             domEvents.addEventListener(object, 'click', function(){selectCube(cubes[i][j])}, false)
@@ -23,7 +22,7 @@ function createMap(size,length,pas){
     }
     let rectangle = new THREE.Mesh(geometryRect,materialPlateau);
     rectangle.position.x = pas -pas/3;
-    rectangle.position.y = pas + Math.floor(totalLength/2);
+    rectangle.position.y = pas + Math.floor(totalLength/2);;
     rectangle.position.z = -0.5;
     rectangle.name = "rectangle";
     scene.add(rectangle);
@@ -100,26 +99,24 @@ function onPointerMove( event ) {
 }
 
 function selectCube( cube ) {
-    if(cube._hasBomb){alert("perdu")}
+    if(cube._hasBomb){
+      createMiniCubes(cube);
+      cube._mesh.geometry.dispose();
+      cube._mesh.material.dispose();
+      scene.remove(cube._mesh);
+    }
     else{
         let textGeo;
         let textNumber = cube._numberNeighboorBomb.toString();
-        console.log(textNumber);
         loader.load( './ressources/font/droid_sans_mono_regular.typeface.json', function ( font ) {
 
             textGeo = new THREE.TextGeometry( textNumber, {
                 font: font,
                 size: 1,
                 height: 0.1,
-                // curveSegments: 12,
-                // bevelEnabled: true,
-                // bevelThickness: 10,
-                // bevelSize: 8,
-                // bevelOffset: 0,
-                // bevelSegments: 5
+                
             } );
             textGeo.computeBoundingBox();
-            //const textMesh = new THREE.Mesh( textGeo, materialDigit );
             cube._mesh.geometry.dispose();
             cube._mesh.geometry = textGeo;
 
@@ -127,15 +124,41 @@ function selectCube( cube ) {
     }
 }
 
+function createMiniCubes(cube){
+  for (var i = 0; i < numberMiniCubes; i++) {
+    const miniCube = new MiniCube(sizeMiniCube,maxSpeed,maxRotation);
+    miniCube._mesh.position.x = cube._mesh.position.x;
+    miniCube._mesh.position.y = cube._mesh.position.y;
+    miniCube._mesh.position.z = cube._mesh.position.z;
+    miniCubes.push(miniCube);
+    scene.add(miniCube._mesh);
+  }
+}
+
 //Déclaration des constantes
 const loader = new THREE.FontLoader();
 //Constantes
 //Variables Jeux
 const size = 4;
+const sizeMiniCube = .2;
 const length = 1;
-const pas = 0.5;
+const pas = .5;
 const height = 1;
 const width = 1;
+const numberMiniCubes = 50;
+const maxSpeed = 0.5;
+const maxRotation = .1;
+//Elements HTML poour la fin
+const popup_fond = '<div id = "alert-fond">\
+</div>';
+
+const popup_alert = '<div id="alert" >\
+<div id = "alert-contenu" ></div>\
+<div id = "your-score">Votre Score est : </div>\
+<div id = "score"></div>\
+<button id = "bouton-retry">Rééssayer</button>\
+<button id = "bouton-recharge">Nouveau jeu</button>\
+</div>';
 //cube
 const geometry = new THREE.BoxGeometry();
 //plateau
@@ -149,7 +172,8 @@ const geometryRect = new THREE.BoxGeometry(sizePlateau,sizePlateau,0.1);
 //Cubes
 const cubes = [[],[],[],[]];
 
-
+//MiniCubes pour la fin
+const miniCubes = [];
 
 let INTERSECTED;
 const scene = new THREE.Scene();
@@ -174,11 +198,11 @@ controls.keys = {
 }
 controls.listenToKeyEvents(window);
 
-controls.mouseButtons = {
-	LEFT: null,
-	MIDDLE: THREE.MOUSE.DOLLY,
-	RIGHT: null
-}
+// controls.mouseButtons = {
+// 	LEFT: null,
+// 	MIDDLE: THREE.MOUSE.DOLLY,
+// 	RIGHT: null
+// }
 controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
 controls.dampingFactor = 0.05;
 controls.screenSpacePanning = true;
@@ -199,18 +223,20 @@ const pointer = new THREE.Vector2();
 //DomEvents
 var domEvents	= new THREEx.DomEvents(camera, renderer.domElement)
 
-//Explosion
-const animation = new explosion.default();
-
 
 renderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
 
 
 const render = function () {
-    requestAnimationFrame( render );
+  requestAnimationFrame( render );
 
-    // update the picking ray with the camera and pointer position
+  //Animate Minicubes if they are any
+  miniCubes.forEach(miniCube => {
+    miniCube.move();
+  });
+
+  // update the picking ray with the camera and pointer position
 	raycaster.setFromCamera( pointer, camera );
 
 	// calculate objects intersecting the picking ray
@@ -260,82 +286,6 @@ render();
 
 
 
-//test oeuf
-function load() {
-    let that = this;
-    let i = 0;
-    let parent;
-    let pos = new THREE.Vector3(0, 0, 0);
-    let poses = [];
-    this.voron = [];
-
-    this.loader.load(
-      "egg-thick.glb",
-      function(gltf) {
-        var bbox = new THREE.Box3().setFromObject(gltf.scene);
-
-        gltf.scene.traverse(function(child) {
-          if (child.name === "Voronoi_Fracture") {
-            if (child.children[0].children.length > 2) {
-              child.children.forEach(f => {
-                f.children.forEach(m => {
-                  that.voron.push(m.clone());
-                });
-              });
-            } else {
-              child.children.forEach(m => {
-                that.voron.push(m.clone());
-              });
-            }
-          }
-        });
-
-        that.geoms = [];
-        that.geoms1 = [];
-        let j = 0;
-        that.voron = that.voron.filter(v => {
-          if (v.isMesh) return false;
-          else {
-            j++;
-            let vtempo = that.processSurface(v, j);
-
-            if (that.inverted) {
-              that.geoms1.push(vtempo.surface);
-              that.geoms.push(vtempo.volume);
-            } else {
-              that.geoms.push(vtempo.surface);
-              that.geoms1.push(vtempo.volume);
-            }
-
-            return true;
-          }
-        });
-
-        let s = THREE.BufferGeometryUtils.mergeBufferGeometries(
-          that.geoms,
-          false
-        );
-        let mesh = new THREE.Mesh(s, that.material);
-        mesh.frustumCulled = false;
-        that.scene.add(mesh);
-
-        let s1 = THREE.BufferGeometryUtils.mergeBufferGeometries(
-          that.geoms1,
-          false
-        );
-        let mesh1 = new THREE.Mesh(s1, that.material1);
-        mesh1.frustumCulled = false;
-        that.scene.add(mesh1);
-        that.onLoad();
-      },
-      undefined,
-      function(e) {
-        console.error(e);
-      }
-    );
-  }
-
-  load();
 
 
 
