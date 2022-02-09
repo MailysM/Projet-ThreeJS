@@ -1,6 +1,6 @@
 class MiniCube  {
 	
-	constructor(size,MAX_SPEED,MAX_ROT) {
+	constructor(size,MAX_SPEED,MAX_ROT,couleur) {
 
 	
         this._vitesseX = Math.random()*MAX_SPEED*2 - MAX_SPEED ;
@@ -11,7 +11,7 @@ class MiniCube  {
         this._rotationZ = Math.random()*MAX_ROT*2 - MAX_ROT;
         const geometry = new THREE.BoxGeometry(size,size,size);
         const material =  new THREE.MeshPhongMaterial({
-            color:  0x581845 ,
+            color:  couleur ,
             flatShading: true
         });
         this._mesh = new THREE.Mesh(geometry, material);
