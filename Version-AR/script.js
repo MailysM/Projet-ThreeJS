@@ -15,12 +15,12 @@ animate();
 
 function init() {
 
-    console.log(DEMINEUR.cubes);
+    DEMINEUR.init();
 
     container = document.createElement( 'div' );
     document.body.appendChild( container );
 
-    scene = new THREE.Scene();
+    scene = DEMINEUR.scene;
 
     camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.01, 20 );
 
