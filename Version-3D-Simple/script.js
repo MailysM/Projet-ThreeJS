@@ -1,9 +1,77 @@
-import {Cube} from "./modules/Cube.js"
-import {MiniCube} from "./modules/MiniCube.js"
+import {Cube} from "../modules/Cube.js"
+import {MiniCube} from "../modules/MiniCube.js"
+
+//Déclaration des constantes
+export const loader = new THREE.FontLoader();
+//Constantes
+//Variables Jeux
+export const size = 4;
+export const sizeMiniCube = .2;
+export const length = 1;
+export const pas = .5;
+export const height = 1;
+export const width = 1;
+export const numberMiniCubes = 50;
+export const maxSpeed = 0.5;
+export const maxRotation = .1;
+//Elements HTML poour la fin
+
+export const popup_alert = '<div id="alert" >\
+<div id = "alert-contenu" ></div>\
+Vous avez perdu \
+<button id = "bouton-retry">Rejouer</button>\
+</div>';
+
+export const popup_alert_gagner = '<div id="alert" >\
+<div id = "alert-contenu" ></div>\
+Vous avez gagnez \
+<button id = "bouton-retry">Rejouer</button>\
+</div>';
+//cube
+export const geometry = new THREE.BoxGeometry();
+//plateau
+export const sizePlateau = size*length+(size-1)*pas+2*pas;
+export const materialPlateau = new THREE.MeshStandardMaterial({
+    color: 0xf1d00a ,
+    flatShading: true
+});
+export const geometryRect = new THREE.BoxGeometry(sizePlateau,sizePlateau,0.1);
+//Palettes couleur
+export const palette = [0xb0c4de,0xb0e0e6,0xadd8e6,0x87ceeb,0x87cefa,0x00bfff,0x1e90ff,0x6495ed,0x4682b4]
+
+//Cubes
+export const cubes = [[],[],[],[]];
+
+//MiniCubes pour la fin
+export const miniCubes = [];
+
+export let INTERSECTED;
+export const scene = new THREE.Scene();
+
+export const aspect = window.innerWidth / window.innerHeight;
+export const camera = new THREE.PerspectiveCamera( 70,aspect,0.1, 100 );
+
+
+export const renderer = new THREE.WebGLRenderer();
+export const controls = new THREE.MapControls( camera , renderer.domElement );
+
+// spotlights
+export const spotLight1 = new THREE.SpotLight(0xffffff);
+export const spotLight2 = new THREE.SpotLight(0xffffff);
+
+
+export const raycaster = new THREE.Raycaster();
+export const pointer = new THREE.Vector2();
+
+//DomEvents
+export const domEvents	= new THREEx.DomEvents(camera, renderer.domElement);
+
+//Booleens pour la fin de partie
+export const tester = true;
 
 
 ///Functions
-function createMap(){
+export function createMap(){
     let totalLength = size*length+(size-1)*pas;
     for (let i = 0; i < size; i++) {
         for(let j = 0; j < size; j++){
@@ -30,7 +98,7 @@ function createMap(){
 
 }
 
-function setBombsMap(){
+export function setBombsMap(){
     const totalNumberBombs = Math.floor(size*size/8) + 1;
     let compteur = 0;
     while(compteur < totalNumberBombs){
@@ -46,13 +114,13 @@ function setBombsMap(){
     }
 }
 
-function getRandomInt(min, max) {
+export function getRandomInt(min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min +1)) + min;
 }
 
-function setNeighboorBomb(i,j){
+export function setNeighboorBomb(i,j){
 
     if(i>0){
         cubes[i-1][j].addBombNeighboor();
@@ -88,7 +156,7 @@ function getCubeById(id,cubes){
     return false;
 }
 
-function onPointerMove( event ) {
+export function onPointerMove( event ) {
     event.preventDefault();
 	// calculate pointer position in normalized device coordinates
 	// (-1 to +1) for both components
@@ -97,7 +165,7 @@ function onPointerMove( event ) {
 
 }
 
-function selectCube( cube,cubes ) {
+export function selectCube( cube,cubes ) {
     if(cube._hasBomb){
       createMiniCubes(cube);
       cube._mesh.geometry.dispose();
@@ -133,7 +201,7 @@ function selectCube( cube,cubes ) {
     }
 }
 
-function createMiniCubes(cube){
+export function createMiniCubes(cube){
   for (var i = 0; i < numberMiniCubes; i++) {
     const miniCube = new MiniCube(sizeMiniCube,maxSpeed,maxRotation,palette[Math.floor(Math.random()*palette.length)]);
     miniCube._mesh.position.x = cube._mesh.position.x;
@@ -144,18 +212,7 @@ function createMiniCubes(cube){
   }
 }
 
-function clearScene(){
-  for (let i = 0; i < size; i++) {
-    for(let j = 0; j < size; j++){
-      cubes[i][j]._mesh.geometry.dispose();
-      cubes[i][j]._mesh.geometry = new THREE.BoxGeometry();
-      cubes[i][j]._mesh.name = "text";
-      cubes[i][j]._hasBomb = false;
-    }
-  }
-}
-
-function testGagner(test = true){
+export function testGagner(test = true){
   for (let i = 0; i < size; i++) {
     for(let j = 0; j < size; j++){
       if(cubes[i][j]._mesh.name == "cube" && cubes[i][j]._hasBomb== false && test){return false}
@@ -165,106 +222,64 @@ function testGagner(test = true){
   return true;
 }
 
-//Déclaration des constantes
-const loader = new THREE.FontLoader();
-//Constantes
-//Variables Jeux
-const size = 4;
-const sizeMiniCube = .2;
-const length = 1;
-const pas = .5;
-const height = 1;
-const width = 1;
-const numberMiniCubes = 50;
-const maxSpeed = 0.5;
-const maxRotation = .1;
-//Elements HTML poour la fin
+//Fonctions pour le rendu
 
-const popup_alert = '<div id="alert" >\
-<div id = "alert-contenu" ></div>\
-Vous avez perdu \
-<button id = "bouton-retry">Rejouer</button>\
-</div>';
-
-const popup_alert_gagner = '<div id="alert" >\
-<div id = "alert-contenu" ></div>\
-Vous avez gagnez \
-<button id = "bouton-retry">Rejouer</button>\
-</div>';
-//cube
-const geometry = new THREE.BoxGeometry();
-//plateau
-const sizePlateau = size*length+(size-1)*pas+2*pas;
-const materialPlateau = new THREE.MeshStandardMaterial({
-    color: 0xf1d00a ,
-    flatShading: true
-});
-const geometryRect = new THREE.BoxGeometry(sizePlateau,sizePlateau,0.1);
-//Palettes couleur
-const palette = [0xb0c4de,0xb0e0e6,0xadd8e6,0x87ceeb,0x87cefa,0x00bfff,0x1e90ff,0x6495ed,0x4682b4]
-//Cubes
-let cubes = [[],[],[],[]];
-
-//MiniCubes pour la fin
-const miniCubes = [];
-
-let INTERSECTED;
-const scene = new THREE.Scene();
-scene.background = new THREE.Color( 0xcccccc );;
-
-const aspect = window.innerWidth / window.innerHeight;
-const camera = new THREE.PerspectiveCamera( 70,aspect,0.1, 100 );
-camera.position.set( 10, 10, 8 );
-
-const renderer = new THREE.WebGLRenderer();
-const controls = new THREE.MapControls( camera , renderer.domElement );
-controls.enablePan = true;
-controls.enableZoom = true;
-controls.enableRotate = true;
+export function init(){
+  scene.background = new THREE.Color( 0xcccccc );;
 
 
-controls.keys = {
-	LEFT: 'ArrowLeft', //left arrow
-	UP: 'ArrowUp', // up arrow
-	RIGHT: 'ArrowRight', // right arrow
-	BOTTOM: 'ArrowDown' // down arrow
+  camera.position.set( 10, 10, 8 );
+
+
+  controls.enablePan = true;
+  controls.enableZoom = true;
+  controls.enableRotate = true;
+
+
+  controls.keys = {
+    LEFT: 'ArrowLeft', //left arrow
+    UP: 'ArrowUp', // up arrow
+    RIGHT: 'ArrowRight', // right arrow
+    BOTTOM: 'ArrowDown' // down arrow
+  }
+  controls.listenToKeyEvents(window);
+
+  // controls.mouseButtons = {
+  // 	LEFT: null,
+  // 	MIDDLE: THREE.MOUSE.DOLLY,
+  // 	RIGHT: null
+  // }
+  controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
+  controls.dampingFactor = 0.05;
+  controls.screenSpacePanning = true;
+
+  controls.minPolarAngle = 2.35;
+  controls.maxPolarAngle = 2.35;
+  controls.minAzimuthAngle = 0;
+  controls.maxAzimuthAngle = 0;
+
+
+  spotLight1.position.set(200, 100, 100);
+  scene.add(spotLight1);
+
+  spotLight2.position.set(-200, -100, 100);
+  scene.add(spotLight2);
+
+  renderer.setSize( window.innerWidth, window.innerHeight );
+  document.body.appendChild( renderer.domElement );
+
+  //Initialisation
+  document.addEventListener( 'mousemove', onPointerMove );
+
+  createMap();
+  setBombsMap();
+
+  render();
 }
-controls.listenToKeyEvents(window);
-
-// controls.mouseButtons = {
-// 	LEFT: null,
-// 	MIDDLE: THREE.MOUSE.DOLLY,
-// 	RIGHT: null
-// }
-controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
-controls.dampingFactor = 0.05;
-controls.screenSpacePanning = true;
-
-controls.minPolarAngle = 2.35;
-controls.maxPolarAngle = 2.35;
-controls.minAzimuthAngle = 0;
-controls.maxAzimuthAngle = 0;
-
-// spotlights
-const spotLight1 = new THREE.SpotLight(0xffffff);
-spotLight1.position.set(200, 100, 100);
-scene.add(spotLight1);
-const spotLight2 = new THREE.SpotLight(0xffffff);
-spotLight2.position.set(-200, -100, 100);
-scene.add(spotLight2);
-
-const raycaster = new THREE.Raycaster();
-const pointer = new THREE.Vector2();
-
-//DomEvents
-var domEvents	= new THREEx.DomEvents(camera, renderer.domElement)
-
-let tester = true;
-renderer.setSize( window.innerWidth, window.innerHeight );
-document.body.appendChild( renderer.domElement );
 
 
-const render = function () {
+
+export const render = function () {
   requestAnimationFrame( render );
 
   //Animate Minicubes if they are any
@@ -323,13 +338,7 @@ const render = function () {
     renderer.render(scene, camera);
 };
 
-//Initialisation
-document.addEventListener( 'mousemove', onPointerMove );
 
-createMap();
-setBombsMap();
-
-render();
 
 
 

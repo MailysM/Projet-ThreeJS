@@ -1,4 +1,5 @@
-import {ARButton} from "./modules/ARButton.js"
+import {ARButton} from "../modules/ARButton.js"
+import * as DEMINEUR from "../Version-3D-Simple/script.js"
 
 let container;
 let camera, scene, renderer;
@@ -13,6 +14,8 @@ init();
 animate();
 
 function init() {
+
+    console.log(DEMINEUR.cubes);
 
     container = document.createElement( 'div' );
     document.body.appendChild( container );
