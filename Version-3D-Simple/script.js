@@ -342,6 +342,9 @@ function getCubeById(id,cubes){
     renderer.render(scene, camera);
 };
 
+init();
+render();
+
 
 
 
