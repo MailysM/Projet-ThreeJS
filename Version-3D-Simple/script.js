@@ -1,49 +1,23 @@
-import {Cube} from "../modules/Cube.js"
-import {MiniCube} from "../modules/MiniCube.js"
+
+import * as DEMINEUR from "../modules/demineur.js"
 
 //Déclaration des constantes
  const loader = new THREE.FontLoader();
 //Constantes
 //Variables Jeux
  const size = 4;
- const sizeMiniCube = .02;
- const length = .5;
- const pas = .25;
- const height = .5;
- const width = .5;
- const numberMiniCubes = 50;
- const maxSpeed = 0.5;
- const maxRotation = .1;
-//Elements HTML poour la fin
-
- const popup_alert = '<div id="alert" >\
-<div id = "alert-contenu" ></div>\
-Vous avez perdu \
-<button id = "bouton-retry">Rejouer</button>\
-</div>';
-
- const popup_alert_gagner = '<div id="alert" >\
-<div id = "alert-contenu" ></div>\
-Vous avez gagnez \
-<button id = "bouton-retry">Rejouer</button>\
-</div>';
-//cube
- const geometry = new THREE.BoxGeometry();
-//plateau
- const sizePlateau = size*length+(size-1)*pas+2*pas;
- const materialPlateau = new THREE.MeshStandardMaterial({
-    color: 0xf1d00a ,
-    flatShading: true
-});
- const geometryRect = new THREE.BoxGeometry(sizePlateau,sizePlateau,0.1);
-//Palettes couleur
- const palette = [0xb0c4de,0xb0e0e6,0xadd8e6,0x87ceeb,0x87cefa,0x00bfff,0x1e90ff,0x6495ed,0x4682b4]
-
+ const sizeMiniCube = .2;
+ const length = 1;
+ const pas = .5;
+ const height = 1;
+ const width = 1;
 //Cubes
- const cubes = [[],[],[],[]];
+const cubes = [[],[],[],[]];
 
 //MiniCubes pour la fin
- const miniCubes = [];
+const miniCubes = [];
+
+
 
  let INTERSECTED;
  const scene = new THREE.Scene();
@@ -63,172 +37,18 @@ Vous avez gagnez \
  const raycaster = new THREE.Raycaster();
  const pointer = new THREE.Vector2();
 
-//DomEvents
- const domEvents	= new THREEx.DomEvents(camera, renderer.domElement);
-
-//Booleens pour la fin de partie
- const tester = true;
 
 //Group de tous les objets de la scene
  const holder = new THREE.Group();
 
+ //DOM EVent
+ const domEvents	= new THREEx.DomEvents(camera, renderer.domElement);
 
-///Functions
- function createMap(){
-    let totalLength = size*length+(size-1)*pas;
-    for (let i = 0; i < size; i++) {
-        for(let j = 0; j < size; j++){
-            const material = new THREE.MeshLambertMaterial({
-                color: palette[Math.floor(Math.random()*palette.length)]   ,
-                
-            });
-            const object = new THREE.Mesh(geometry, material);
-            object.position.x =  i + i*pas - Math.floor(totalLength/2);
-            object.position.y =  j + j*pas;
-            object.name = "cube";
-            holder.add(object);
-            cubes[i].push(new Cube(height,width,object, object.id));
-            domEvents.addEventListener(object, 'click', function(){selectCube(cubes[i][j],cubes)}, false)
-            
-        }
-    }
-    let rectangle = new THREE.Mesh(geometryRect,materialPlateau);
-    rectangle.position.x = pas - pas/3;
-    rectangle.position.y = pas + Math.floor(totalLength/2);;
-    rectangle.position.z = -0.5;
-    rectangle.name = "rectangle";
-    holder.add(rectangle);
-
-}
-
- function setBombsMap(){
-    const totalNumberBombs = Math.floor(size*size/8) + 1;
-    let compteur = 0;
-    while(compteur < totalNumberBombs){
-        console.log(compteur)
-        let randomI = getRandomInt(0,size-1);
-        let randomJ = getRandomInt(0,size-1);
-        
-        if(cubes[randomI][randomJ]._hasBomb==false){
-            cubes[randomI][randomJ].setBomb(true);
-            setNeighboorBomb(randomI,randomJ);
-            compteur++;
-        } 
-    }
-}
-
- function getRandomInt(min, max) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min +1)) + min;
-}
-
- function setNeighboorBomb(i,j){
-
-    if(i>0){
-        cubes[i-1][j].addBombNeighboor();
-        if(j>0){
-            cubes[i-1][j-1].addBombNeighboor();
-          cubes[i][j-1].addBombNeighboor();
-        }
-        if(j<size-1){
-            cubes[i-1][j+1].addBombNeighboor();
-            cubes[i][j+1].addBombNeighboor();
-        }
-    }
-
-    if(i<size-1){
-        cubes[i+1][j].addBombNeighboor();
-        if(j>0){
-            cubes[i+1][j-1].addBombNeighboor();
-        }
-        if(j<size-1){
-            cubes[i+1][j+1].addBombNeighboor();
-        }
-    }
-
-}
-
-
-function getCubeById(id,cubes){
-    for(let i = 0; i<size ; i++){
-        for(let j = 0 ; j<size ; j++){
-            if(cubes[i][j].getId()== id) return cubes[i][j];
-        }
-    }
-    return false;
-}
-
- function onPointerMove( event ) {
-    event.preventDefault();
-	// calculate pointer position in normalized device coordinates
-	// (-1 to +1) for both components
-	pointer.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-	pointer.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-
-}
-
- function selectCube( cube,cubes ) {
-    if(cube._hasBomb){
-      createMiniCubes(cube);
-      cube._mesh.geometry.dispose();
-      cube._mesh.material.dispose();
-      holder.remove(cube._mesh);
-      if(!document.getElementById("alert")){
-        $("body").append(popup_alert);
-      }
-
-      $(document.getElementById("alert")).removeClass("alert-fin").addClass("alert-entree");
-      $('#bouton-retry').on('click', function() {
-        location.reload();
-        
-      });
-    }
-    else{
-        let textGeo;
-        let textNumber = cube._numberNeighboorBomb.toString();
-        loader.load( './ressources/font/droid_sans_mono_regular.typeface.json', function ( font ) {
-
-            textGeo = new THREE.TextGeometry( textNumber, {
-                font: font,
-                size: 1,
-                height: 0.1,
-                
-            } );
-            textGeo.computeBoundingBox();
-            cube._mesh.geometry.dispose();
-            cube._mesh.geometry = textGeo;
-            cube._mesh.name = "text";
-
-        } );
-    }
-}
-
- function createMiniCubes(cube){
-  for (var i = 0; i < numberMiniCubes; i++) {
-    const miniCube = new MiniCube(sizeMiniCube,maxSpeed,maxRotation,palette[Math.floor(Math.random()*palette.length)]);
-    miniCube._mesh.position.x = cube._mesh.position.x;
-    miniCube._mesh.position.y = cube._mesh.position.y;
-    miniCube._mesh.position.z = cube._mesh.position.z;
-    miniCubes.push(miniCube);
-    holder.add(miniCube._mesh);
-  }
-}
-
- function testGagner(test = true){
-  for (let i = 0; i < size; i++) {
-    for(let j = 0; j < size; j++){
-      if(cubes[i][j]._mesh.name == "cube" && cubes[i][j]._hasBomb== false && test){return false}
-    }
-  }
-  console.log(true);
-  return true;
-}
 
 //Fonctions pour le rendu
 
  function init(){
-  //scene.background = new THREE.Color( 0xcccccc );
+  scene.background = new THREE.Color( 0xcccccc );
 
 
   camera.position.set( 10, 10, 8 );
@@ -247,11 +67,11 @@ function getCubeById(id,cubes){
   }
   controls.listenToKeyEvents(window);
 
-  // controls.mouseButtons = {
-  // 	LEFT: null,
-  // 	MIDDLE: THREE.MOUSE.DOLLY,
-  // 	RIGHT: null
-  // }
+  controls.mouseButtons = {
+  	LEFT: null,
+  	MIDDLE: THREE.MOUSE.DOLLY,
+  	RIGHT: null
+  }
   controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
   controls.dampingFactor = 0.05;
   controls.screenSpacePanning = true;
@@ -274,8 +94,8 @@ function getCubeById(id,cubes){
   //Initialisation
   document.addEventListener( 'mousemove', onPointerMove );
 
-  createMap();
-  setBombsMap();
+  DEMINEUR.createMap(size,length,height,width,pas,cubes,holder,domEvents,miniCubes,sizeMiniCube,scene);
+  DEMINEUR.setBombsMap(size,cubes);
 
   scene.add(holder);
 
@@ -307,13 +127,12 @@ function getCubeById(id,cubes){
             INTERSECTED = intersects[ 0 ].object;
 
             if(INTERSECTED.name == 'cube'){
+              DEMINEUR.setIdCubeSelected(INTERSECTED.id);
               INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
               INTERSECTED.material.emissive.setHex( 0xff0000 );
             } else{
                INTERSECTED = null;
             }
-            
-            
 
         }
 
@@ -326,8 +145,7 @@ function getCubeById(id,cubes){
     }
 
     //Test pour savoir si le jeu est gagné
-    if(testGagner(tester) ){
-      tester = false;
+    if(DEMINEUR.testGagner(cubes) ){
       if(!document.getElementById("alert")){
         $("body").append(popup_alert_gagner);
       }
@@ -341,6 +159,15 @@ function getCubeById(id,cubes){
 
     renderer.render(scene, camera);
 };
+
+function onPointerMove( event ) {
+  event.preventDefault();
+  // calculate pointer position in normalized device coordinates
+  // (-1 to +1) for both components
+  pointer.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+  pointer.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+}
 
 init();
 render();
