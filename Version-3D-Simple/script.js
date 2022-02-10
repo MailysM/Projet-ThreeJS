@@ -2,76 +2,79 @@ import {Cube} from "../modules/Cube.js"
 import {MiniCube} from "../modules/MiniCube.js"
 
 //Déclaration des constantes
-export const loader = new THREE.FontLoader();
+ const loader = new THREE.FontLoader();
 //Constantes
 //Variables Jeux
-export const size = 4;
-export const sizeMiniCube = .2;
-export const length = 1;
-export const pas = .5;
-export const height = 1;
-export const width = 1;
-export const numberMiniCubes = 50;
-export const maxSpeed = 0.5;
-export const maxRotation = .1;
+ const size = 4;
+ const sizeMiniCube = .2;
+ const length = 1;
+ const pas = .5;
+ const height = 1;
+ const width = 1;
+ const numberMiniCubes = 50;
+ const maxSpeed = 0.5;
+ const maxRotation = .1;
 //Elements HTML poour la fin
 
-export const popup_alert = '<div id="alert" >\
+ const popup_alert = '<div id="alert" >\
 <div id = "alert-contenu" ></div>\
 Vous avez perdu \
 <button id = "bouton-retry">Rejouer</button>\
 </div>';
 
-export const popup_alert_gagner = '<div id="alert" >\
+ const popup_alert_gagner = '<div id="alert" >\
 <div id = "alert-contenu" ></div>\
 Vous avez gagnez \
 <button id = "bouton-retry">Rejouer</button>\
 </div>';
 //cube
-export const geometry = new THREE.BoxGeometry();
+ const geometry = new THREE.BoxGeometry();
 //plateau
-export const sizePlateau = size*length+(size-1)*pas+2*pas;
-export const materialPlateau = new THREE.MeshStandardMaterial({
+ const sizePlateau = size*length+(size-1)*pas+2*pas;
+ const materialPlateau = new THREE.MeshStandardMaterial({
     color: 0xf1d00a ,
     flatShading: true
 });
-export const geometryRect = new THREE.BoxGeometry(sizePlateau,sizePlateau,0.1);
+ const geometryRect = new THREE.BoxGeometry(sizePlateau,sizePlateau,0.1);
 //Palettes couleur
-export const palette = [0xb0c4de,0xb0e0e6,0xadd8e6,0x87ceeb,0x87cefa,0x00bfff,0x1e90ff,0x6495ed,0x4682b4]
+ const palette = [0xb0c4de,0xb0e0e6,0xadd8e6,0x87ceeb,0x87cefa,0x00bfff,0x1e90ff,0x6495ed,0x4682b4]
 
 //Cubes
-export const cubes = [[],[],[],[]];
+ const cubes = [[],[],[],[]];
 
 //MiniCubes pour la fin
-export const miniCubes = [];
+ const miniCubes = [];
 
-export let INTERSECTED;
-export const scene = new THREE.Scene();
+ let INTERSECTED;
+ const scene = new THREE.Scene();
 
-export const aspect = window.innerWidth / window.innerHeight;
-export const camera = new THREE.PerspectiveCamera( 70,aspect,0.1, 100 );
+ const aspect = window.innerWidth / window.innerHeight;
+ const camera = new THREE.PerspectiveCamera( 70,aspect,0.1, 100 );
 
 
-export const renderer = new THREE.WebGLRenderer();
-export const controls = new THREE.MapControls( camera , renderer.domElement );
+ const renderer = new THREE.WebGLRenderer();
+ const controls = new THREE.MapControls( camera , renderer.domElement );
 
 // spotlights
-export const spotLight1 = new THREE.SpotLight(0xffffff);
-export const spotLight2 = new THREE.SpotLight(0xffffff);
+ const spotLight1 = new THREE.SpotLight(0xffffff);
+ const spotLight2 = new THREE.SpotLight(0xffffff);
 
 
-export const raycaster = new THREE.Raycaster();
-export const pointer = new THREE.Vector2();
+ const raycaster = new THREE.Raycaster();
+ const pointer = new THREE.Vector2();
 
 //DomEvents
-export const domEvents	= new THREEx.DomEvents(camera, renderer.domElement);
+ const domEvents	= new THREEx.DomEvents(camera, renderer.domElement);
 
 //Booleens pour la fin de partie
-export const tester = true;
+ const tester = true;
+
+//Group de tous les objets de la scene
+ const holder = new THREE.Group();
 
 
 ///Functions
-export function createMap(){
+ function createMap(){
     let totalLength = size*length+(size-1)*pas;
     for (let i = 0; i < size; i++) {
         for(let j = 0; j < size; j++){
@@ -83,7 +86,7 @@ export function createMap(){
             object.position.x =  i + i*pas - Math.floor(totalLength/2);
             object.position.y =  j + j*pas;
             object.name = "cube";
-            scene.add(object);
+            holder.add(object);
             cubes[i].push(new Cube(height,width,object, object.id));
             domEvents.addEventListener(object, 'click', function(){selectCube(cubes[i][j],cubes)}, false)
             
@@ -94,11 +97,11 @@ export function createMap(){
     rectangle.position.y = pas + Math.floor(totalLength/2);;
     rectangle.position.z = -0.5;
     rectangle.name = "rectangle";
-    scene.add(rectangle);
+    holder.add(rectangle);
 
 }
 
-export function setBombsMap(){
+ function setBombsMap(){
     const totalNumberBombs = Math.floor(size*size/8) + 1;
     let compteur = 0;
     while(compteur < totalNumberBombs){
@@ -114,13 +117,13 @@ export function setBombsMap(){
     }
 }
 
-export function getRandomInt(min, max) {
+ function getRandomInt(min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min +1)) + min;
 }
 
-export function setNeighboorBomb(i,j){
+ function setNeighboorBomb(i,j){
 
     if(i>0){
         cubes[i-1][j].addBombNeighboor();
@@ -156,7 +159,7 @@ function getCubeById(id,cubes){
     return false;
 }
 
-export function onPointerMove( event ) {
+ function onPointerMove( event ) {
     event.preventDefault();
 	// calculate pointer position in normalized device coordinates
 	// (-1 to +1) for both components
@@ -165,12 +168,12 @@ export function onPointerMove( event ) {
 
 }
 
-export function selectCube( cube,cubes ) {
+ function selectCube( cube,cubes ) {
     if(cube._hasBomb){
       createMiniCubes(cube);
       cube._mesh.geometry.dispose();
       cube._mesh.material.dispose();
-      scene.remove(cube._mesh);
+      holder.remove(cube._mesh);
       if(!document.getElementById("alert")){
         $("body").append(popup_alert);
       }
@@ -201,18 +204,18 @@ export function selectCube( cube,cubes ) {
     }
 }
 
-export function createMiniCubes(cube){
+ function createMiniCubes(cube){
   for (var i = 0; i < numberMiniCubes; i++) {
     const miniCube = new MiniCube(sizeMiniCube,maxSpeed,maxRotation,palette[Math.floor(Math.random()*palette.length)]);
     miniCube._mesh.position.x = cube._mesh.position.x;
     miniCube._mesh.position.y = cube._mesh.position.y;
     miniCube._mesh.position.z = cube._mesh.position.z;
     miniCubes.push(miniCube);
-    scene.add(miniCube._mesh);
+    holder.add(miniCube._mesh);
   }
 }
 
-export function testGagner(test = true){
+ function testGagner(test = true){
   for (let i = 0; i < size; i++) {
     for(let j = 0; j < size; j++){
       if(cubes[i][j]._mesh.name == "cube" && cubes[i][j]._hasBomb== false && test){return false}
@@ -224,8 +227,8 @@ export function testGagner(test = true){
 
 //Fonctions pour le rendu
 
-export function init(){
-  scene.background = new THREE.Color( 0xcccccc );;
+ function init(){
+  //scene.background = new THREE.Color( 0xcccccc );
 
 
   camera.position.set( 10, 10, 8 );
@@ -260,10 +263,10 @@ export function init(){
 
 
   spotLight1.position.set(200, 100, 100);
-  scene.add(spotLight1);
+  holder.add(spotLight1);
 
   spotLight2.position.set(-200, -100, 100);
-  scene.add(spotLight2);
+  holder.add(spotLight2);
 
   renderer.setSize( window.innerWidth, window.innerHeight );
   document.body.appendChild( renderer.domElement );
@@ -274,11 +277,13 @@ export function init(){
   createMap();
   setBombsMap();
 
+  scene.add(holder);
+
 }
 
 
 
-export const render = function () {
+ const render = function () {
   requestAnimationFrame( render );
 
   //Animate Minicubes if they are any
