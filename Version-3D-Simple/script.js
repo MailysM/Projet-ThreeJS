@@ -6,11 +6,11 @@ import {MiniCube} from "../modules/MiniCube.js"
 //Constantes
 //Variables Jeux
  const size = 4;
- const sizeMiniCube = .2;
- const length = 1;
- const pas = .5;
- const height = 1;
- const width = 1;
+ const sizeMiniCube = .02;
+ const length = .5;
+ const pas = .25;
+ const height = .5;
+ const width = .5;
  const numberMiniCubes = 50;
  const maxSpeed = 0.5;
  const maxRotation = .1;

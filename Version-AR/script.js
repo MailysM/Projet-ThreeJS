@@ -380,8 +380,9 @@ function init() {
     function onSelect() {
 
         if ( reticle.visible ) {
-
+            
             holder.position.setFromMatrixPosition(reticle.matrix);
+            holder.rotation.x = -Math.PI/2;
             holder.visible = true;
             reticle.visible = false;
 
@@ -474,10 +475,13 @@ function render( timestamp, frame ) {
 
                 reticle.visible = true;
                 reticle.matrix.fromArray( hit.getPose( referenceSpace ).transform.matrix );
+                holder.position.setFromMatrixPosition(reticle.matrix);
+                holder.rotation.x = -Math.PI/2;
+                holder.visible = true;
                 mapPositionne = true;
 
             } else {
-
+                holder.visible = false;
                 reticle.visible = false;
 
             }
