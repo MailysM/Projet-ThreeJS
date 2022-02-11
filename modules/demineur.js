@@ -51,7 +51,10 @@ export function setIdCubeSelected(id){IdCubeSelected = id}
 
 ///Functions
 export function createMap(size,height,width,pas,cubes,holder,domEvents,miniCubes,sizeMiniCube,scene){
+    cubes = [];
     let totalLength = size*width+(size-1)*pas;
+    for(let i = 0; i < size; i++){cubes.push([])}
+    
     for (let i = 0; i < size; i++) {
         for(let j = 0; j < size; j++){
             const geometry = new THREE.BoxGeometry(width,height,width);
@@ -60,8 +63,8 @@ export function createMap(size,height,width,pas,cubes,holder,domEvents,miniCubes
                 
             });
             const object = new THREE.Mesh(geometry, material);
-            object.position.x =  i*width + i*pas ;
-            object.position.y =  j*width + j*pas;
+            object.position.x =  i*(width + pas) - totalLength/2;
+            object.position.y =  j*(width + pas) - totalLength/2;
             object.position.z = 0
             object.name = "cube";
             holder.add(object);
@@ -70,15 +73,16 @@ export function createMap(size,height,width,pas,cubes,holder,domEvents,miniCubes
             
         }
     }
-    const sizePlateau = size*width+(size-1)*pas+2*pas;
+    const sizePlateau = totalLength+2*pas;
     const heightPlateau = height/10
     const geometryRect = new THREE.BoxGeometry(sizePlateau,sizePlateau,heightPlateau);
     let rectangle = new THREE.Mesh(geometryRect,materialPlateau);
-    rectangle.position.x = pas + Math.floor(totalLength/2);
-    rectangle.position.y = pas + Math.floor(totalLength/2);
+    rectangle.position.x = 0 - pas //- totalLength/2;
+    rectangle.position.y = 0//pas //- totalLength/2;
     rectangle.position.z = -heightPlateau*10;
     rectangle.name = "rectangle";
     holder.add(rectangle);
+    return cubes;
 
 }
 
@@ -88,7 +92,8 @@ export  function setBombsMap(size,cubes){
     while(compteur < totalNumberBombs){
         let randomI = getRandomInt(0,size-1);
         let randomJ = getRandomInt(0,size-1);
-        
+        console.log(randomI,randomJ)
+        console.log(cubes)
         if(cubes[randomI][randomJ]._hasBomb==false){
             cubes[randomI][randomJ].setBomb(true);
             setNeighboorBomb(randomI,randomJ,cubes);

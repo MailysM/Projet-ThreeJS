@@ -5,13 +5,13 @@ import * as DEMINEUR from "../modules/demineur.js"
  const loader = new THREE.FontLoader();
 //Constantes
 //Variables Jeux
- const size = 4;
- const sizeMiniCube = .2;
- const pas = .5;
- const height = 1;
- const width = 1;
+const size = 10;
+const sizeMiniCube = .2;
+const pas = .5;
+const height = 1;
+const width = 1;
 //Cubes
-const cubes = [[],[],[],[]];
+let cubes ;
 
 //MiniCubes pour la fin
 const miniCubes = [];
@@ -92,8 +92,9 @@ const miniCubes = [];
 
   //Initialisation
   document.addEventListener( 'mousemove', onPointerMove );
-
-  DEMINEUR.createMap(size,height,width,pas,cubes,holder,domEvents,miniCubes,sizeMiniCube,scene);
+  console.log(cubes)
+  cubes = DEMINEUR.createMap(size,height,width,pas,cubes,holder,domEvents,miniCubes,sizeMiniCube,scene);
+  
   DEMINEUR.setBombsMap(size,cubes);
 
   scene.add(holder);
