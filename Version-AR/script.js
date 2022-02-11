@@ -10,168 +10,80 @@ let reticle;
 
 let hitTestSource = null;
 let hitTestSourceRequested = false;
+let mapOK = false;
 
-let mapPositionne = false;
+let INTERSECTED;
 
-
-//Déclaration des constantes
-const loader = new THREE.FontLoader();
 //Constantes
 //Variables Jeux
  const size = 4;
- const sizeMiniCube = .2;
- const length = 1;
- const pas = .5;
- const height = 1;
- const width = 1;
+ const sizeMiniCube = .02;
+ const pas = .05;
+ const height = 0.1;
+ const width = 0.1;
+ const maxSpeed = 0.05;
+ const maxRotation = .1;
 //Cubes
 const cubes = [[],[],[],[]];
 
 //MiniCubes pour la fin
 const miniCubes = [];
 
+let cubeSelected =null; 
 
+const scene = new THREE.Scene();
 
- let INTERSECTED;
- const scene = new THREE.Scene();
+const aspect = window.innerWidth / window.innerHeight;
+const camera = new THREE.PerspectiveCamera( 70,aspect,0.1, 100 );
 
- const aspect = window.innerWidth / window.innerHeight;
- const camera = new THREE.PerspectiveCamera( 70,aspect,0.1, 100 );
+//RayCaster
+const raycaster = new THREE.Raycaster();
+const pointer = new THREE.Vector2();
 
-
- const renderer = new THREE.WebGLRenderer();
- const controls = new THREE.MapControls( camera , renderer.domElement );
-
-// spotlights
- const spotLight1 = new THREE.SpotLight(0xffffff);
- const spotLight2 = new THREE.SpotLight(0xffffff);
-
-
- const raycaster = new THREE.Raycaster();
- const pointer = new THREE.Vector2();
-
+const renderer = new THREE.WebGLRenderer( { antialias: true, alpha: true } );
 
 //Group de tous les objets de la scene
- const holder = new THREE.Group();
+const holder = new THREE.Group();
 
- //DOM EVent
- const domEvents	= new THREEx.DomEvents(camera, renderer.domElement);
-
-
-
-//Fonctions pour le rendu
-
- function init_1(){
-  //scene.background = new THREE.Color( 0xcccccc );
+//DOM EVent
+const domEvents = new THREEx.DomEvents(camera, renderer.domElement);
 
 
-  camera.position.set( 10, 10, 8 );
-
-
-  controls.enablePan = true;
-  controls.enableZoom = true;
-  controls.enableRotate = true;
-
-
-  controls.keys = {
-    LEFT: 'ArrowLeft', //left arrow
-    UP: 'ArrowUp', // up arrow
-    RIGHT: 'ArrowRight', // right arrow
-    BOTTOM: 'ArrowDown' // down arrow
+function onPointerTouch( event ) {
+    if(cubeSelected!=null){
+        DEMINEUR.selectCube(cubeSelected,miniCubes,sizeMiniCube,holder)
+    }
+    
+  
   }
-  controls.listenToKeyEvents(window);
 
-  // controls.mouseButtons = {
-  // 	LEFT: null,
-  // 	MIDDLE: THREE.MOUSE.DOLLY,
-  // 	RIGHT: null
-  // }
-  controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
-  controls.dampingFactor = 0.05;
-  controls.screenSpacePanning = true;
+  function onSelect() {
 
-  controls.minPolarAngle = 2.35;
-  controls.maxPolarAngle = 2.35;
-  controls.minAzimuthAngle = 0;
-  controls.maxAzimuthAngle = 0;
+    if ( reticle.visible ) {
+        
+        holder.position.setFromMatrixPosition(reticle.matrix);
+        holder.rotation.x = -Math.PI/2;
+        holder.visible = true;
+        reticle.visible = false;
+        mapOK = true;
+        
 
+        this.addEventListener('select',onPointerTouch,false)
+        this.removeEventListener('select', onSelect);
+        //addEventListenerCubes();
 
-  spotLight1.position.set(200, 100, 100);
-  holder.add(spotLight1);
+    }
 
-  spotLight2.position.set(-200, -100, 100);
-  holder.add(spotLight2);
-
-  renderer.setSize( window.innerWidth, window.innerHeight );
-  document.body.appendChild( renderer.domElement );
-
-  //Initialisation
-  document.addEventListener( 'mousemove', onPointerMove );
 }
 
- const render_01 = function () {
-  requestAnimationFrame( render );
-
-  //Animate Minicubes if they are any
-  miniCubes.forEach(miniCube => {
-    miniCube.move();
-  });
-
-  // update the picking ray with the camera and pointer position
-	raycaster.setFromCamera( pointer, camera );
-
-	// calculate objects intersecting the picking ray
-	const intersects = raycaster.intersectObjects( scene.children );
-
-
-    if ( intersects.length > 0 ) {
-
-        if ( INTERSECTED != intersects[ 0 ].object ) {
-
-            if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
-
-            INTERSECTED = intersects[ 0 ].object;
-
-            if(INTERSECTED.name == 'cube'){
-              INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
-              INTERSECTED.material.emissive.setHex( 0xff0000 );
-            } else{
-               INTERSECTED = null;
-            }
-            
-            
-
-        }
-
-    } else {
-
-        if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
-
-        INTERSECTED = null;
-
-    }
-
-    //Test pour savoir si le jeu est gagné
-    if(testGagner(tester) ){
-      tester = false;
-      if(!document.getElementById("alert")){
-        $("body").append(popup_alert_gagner);
-      }
-
-      $(document.getElementById("alert")).removeClass("alert-fin").addClass("alert-entree");
-      $('#bouton-retry').on('click', function() {
-        location.reload();
-      });
-    }
-    controls.update();
-
-    renderer.render(scene, camera);
-};
 
 
 //Fonction pas à moi
 
 function init() {
+
+    DEMINEUR.setSpeedMiniCubes(maxSpeed,maxRotation);
+    
 
     container = document.createElement( 'div' );
     document.body.appendChild( container );
@@ -187,32 +99,17 @@ function init() {
     renderer.xr.enabled = true;
     container.appendChild( renderer.domElement );
 
-    //
-
+    //ARButton
     document.body.appendChild( ARButton.createButton( renderer, { requiredFeatures: [ 'hit-test' ] } ) );
+    
 
-    //
-
-    const geometry = new THREE.CylinderGeometry( 0.1, 0.1, 0.2, 32 ).translate( 0, 0.1, 0 );
-
-    function onSelect() {
-
-        if ( reticle.visible ) {
-            
-            holder.position.setFromMatrixPosition(reticle.matrix);
-            holder.rotation.x = -Math.PI/2;
-            holder.visible = true;
-            reticle.visible = false;
-
-        }
-
-    }
+    
 
     //Positionne bien le plateau
 
-
     controller = renderer.xr.getController( 0 );
-    controller.addEventListener( 'select', onSelect );
+    controller.addEventListener( 'select', onSelect);
+    container.addEventListener( 'touchstart', onPointerTouch );
     scene.add( controller );
 
     reticle = new THREE.Mesh(
@@ -229,7 +126,7 @@ function init() {
 
     holder.visible = false;
 
-    DEMINEUR.createMap(size,length,height,width,pas,cubes,holder,domEvents,miniCubes,sizeMiniCube,scene);
+    DEMINEUR.createMap(size,height,width,pas,cubes,holder,domEvents,miniCubes,sizeMiniCube,scene);
     DEMINEUR.setBombsMap(size,cubes);
     scene.add(holder);
 
@@ -244,9 +141,12 @@ function onWindowResize() {
 
 }
 
+
+
 //
 
 function animate() {
+     
 
     renderer.setAnimationLoop( render );
 
@@ -255,6 +155,10 @@ function animate() {
 function render( timestamp, frame ) {
 
     if ( frame ) {
+        //Animate Minicubes if they are any
+        miniCubes.forEach(miniCube => {
+            miniCube.move();
+        });
 
         const referenceSpace = renderer.xr.getReferenceSpace();
         const session = renderer.xr.getSession();
@@ -281,28 +185,74 @@ function render( timestamp, frame ) {
             hitTestSourceRequested = true;
 
         }
+        if(!mapOK){
+            if ( hitTestSource) {
 
-        if ( hitTestSource) {
-
-            const hitTestResults = frame.getHitTestResults( hitTestSource );
-
-            if ( hitTestResults.length ) {
-
-                const hit = hitTestResults[ 0 ];
-
-                reticle.visible = true;
-                reticle.matrix.fromArray( hit.getPose( referenceSpace ).transform.matrix );
-                holder.position.setFromMatrixPosition(reticle.matrix);
-                holder.rotation.x = -Math.PI/2;
-                holder.visible = true;
-                mapPositionne = true;
-
-            } else {
-                holder.visible = false;
-                reticle.visible = false;
-
+                const hitTestResults = frame.getHitTestResults( hitTestSource );
+    
+                if ( hitTestResults.length ) {
+    
+                    const hit = hitTestResults[ 0 ];
+    
+                    reticle.visible = true;
+                    reticle.matrix.fromArray( hit.getPose( referenceSpace ).transform.matrix );
+                    
+                
+                } else {
+                    holder.visible = false;
+                    reticle.visible = false;
+    
+                }
+    
             }
 
+            
+        }
+
+        
+        // // update the picking ray with the camera and pointer position
+        raycaster.setFromCamera( pointer, camera );
+
+        // calculate objects intersecting the picking ray
+         const intersects = raycaster.intersectObjects( scene.children );
+        if ( intersects.length > 0 ) {
+
+             if ( INTERSECTED != intersects[ 0 ].object ) {
+    
+                 if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+    
+                 INTERSECTED = intersects[ 0 ].object;
+    
+                 if(INTERSECTED.name == 'cube'){
+                    cubeSelected = DEMINEUR.getCubeById(INTERSECTED.id,cubes)
+                    
+                    INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
+                    INTERSECTED.material.emissive.setHex( 0xff0000 );
+                 } else{
+                    INTERSECTED = null;
+                 }
+    
+             }
+    
+         } else {
+    
+             if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+    
+             INTERSECTED = null;
+    
+         }
+       
+
+        //Test pour savoir si le jeu est gagné
+        if(DEMINEUR.testGagner(cubes) ){
+        if(!document.getElementById("alert")){
+            $("body").append(popup_alert_gagner);
+        }
+
+        $(document.getElementById("alert")).removeClass("alert-fin").addClass("alert-entree");
+        $('#bouton-retry').on('click', function() {
+            location.reload();
+        });
         }
 
     }

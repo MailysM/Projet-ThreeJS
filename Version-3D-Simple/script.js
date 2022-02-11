@@ -7,7 +7,6 @@ import * as DEMINEUR from "../modules/demineur.js"
 //Variables Jeux
  const size = 4;
  const sizeMiniCube = .2;
- const length = 1;
  const pas = .5;
  const height = 1;
  const width = 1;
@@ -94,7 +93,7 @@ const miniCubes = [];
   //Initialisation
   document.addEventListener( 'mousemove', onPointerMove );
 
-  DEMINEUR.createMap(size,length,height,width,pas,cubes,holder,domEvents,miniCubes,sizeMiniCube,scene);
+  DEMINEUR.createMap(size,height,width,pas,cubes,holder,domEvents,miniCubes,sizeMiniCube,scene);
   DEMINEUR.setBombsMap(size,cubes);
 
   scene.add(holder);
@@ -108,6 +107,7 @@ const miniCubes = [];
 
   //Animate Minicubes if they are any
   miniCubes.forEach(miniCube => {
+
     miniCube.move();
   });
 

@@ -29,26 +29,32 @@ Vous avez gagnez \
 </div>';
 
  const numberMiniCubes = 50;
- const maxSpeed = 0.5;
- const maxRotation = .1;
+ let maxSpeed = 0.5;
+ let maxRotation = .1;
 
  let IdCubeSelected;
+
+ export function setSpeedMiniCubes(newSpeed,newRotation){
+     maxSpeed = newSpeed;
+     maxRotation = newRotation;
+ }
 
 export function setIdCubeSelected(id){IdCubeSelected = id}
 
 ///Functions
-export function createMap(size,length,height,width,pas,cubes,holder,domEvents,miniCubes,sizeMiniCube,scene){
-    let totalLength = size*length+(size-1)*pas;
+export function createMap(size,height,width,pas,cubes,holder,domEvents,miniCubes,sizeMiniCube,scene){
+    let totalLength = size*width+(size-1)*pas;
     for (let i = 0; i < size; i++) {
         for(let j = 0; j < size; j++){
-            const geometry = new THREE.BoxGeometry();
+            const geometry = new THREE.BoxGeometry(width,height,width);
             const material = new THREE.MeshLambertMaterial({
                 color: palette[Math.floor(Math.random()*palette.length)]   ,
                 
             });
             const object = new THREE.Mesh(geometry, material);
-            object.position.x =  i + i*pas - Math.floor(totalLength/2);
-            object.position.y =  j + j*pas;
+            object.position.x =  i*width + i*pas ;
+            object.position.y =  j*width + j*pas;
+            object.position.z = 0
             object.name = "cube";
             holder.add(object);
             cubes[i].push(new Cube(height,width,object, object.id));
@@ -56,12 +62,13 @@ export function createMap(size,length,height,width,pas,cubes,holder,domEvents,mi
             
         }
     }
-    const sizePlateau = size*length+(size-1)*pas+2*pas;
-    const geometryRect = new THREE.BoxGeometry(sizePlateau,sizePlateau,0.1);
+    const sizePlateau = size*width+(size-1)*pas+2*pas;
+    const heightPlateau = height/10
+    const geometryRect = new THREE.BoxGeometry(sizePlateau,sizePlateau,heightPlateau);
     let rectangle = new THREE.Mesh(geometryRect,materialPlateau);
-    rectangle.position.x = pas - pas/3;
-    rectangle.position.y = pas + Math.floor(totalLength/2);;
-    rectangle.position.z = -0.5;
+    rectangle.position.x = pas + Math.floor(totalLength/2);
+    rectangle.position.y = pas + Math.floor(totalLength/2);
+    rectangle.position.z = -heightPlateau*10;
     rectangle.name = "rectangle";
     holder.add(rectangle);
 
@@ -116,9 +123,17 @@ export  function setNeighboorBomb(i,j,cubes){
 
 
 export function getCubeById(id,cubes){
-    for(let i = 0; i<size ; i++){
-        for(let j = 0 ; j<size ; j++){
+    for(let i = 0; i<cubes.length ; i++){
+        for(let j = 0 ; j<cubes.length ; j++){
             if(cubes[i][j].getId()== id) return cubes[i][j];
+        }
+    }
+    return false;
+}
+export function getIJByID(id,cubes){
+    for(let i = 0; i<cubes.length ; i++){
+        for(let j = 0 ; j<cubes.length; j++){
+            if(cubes[i][j].getId()== id) return i,j;
         }
     }
     return false;
@@ -130,7 +145,7 @@ export  function selectCube( cube ,miniCubes,sizeMiniCube,scene) {
       createMiniCubes(cube,miniCubes,sizeMiniCube,scene);
       cube._mesh.geometry.dispose();
       cube._mesh.material.dispose();
-      scene.remove(cube._mesh);
+      //scene.remove(cube._mesh);
       if(!document.getElementById("alert")){
         $("body").append(popup_alert);
       }
@@ -144,12 +159,14 @@ export  function selectCube( cube ,miniCubes,sizeMiniCube,scene) {
     else{
         let textGeo;
         let textNumber = cube._numberNeighboorBomb.toString();
+        let textWidth = cube._width;
+        let textHeight = cube._height/10
         loader.load( './ressources/font/droid_sans_mono_regular.typeface.json', function ( font ) {
 
             textGeo = new THREE.TextGeometry( textNumber, {
                 font: font,
-                size: 1,
-                height: 0.1,
+                size: textWidth,
+                height: textHeight,
                 
             } );
             textGeo.computeBoundingBox();
@@ -169,7 +186,6 @@ export  function createMiniCubes(cube,miniCubes,sizeMiniCube,scene){
     miniCube._mesh.position.z = cube._mesh.position.z;
     miniCubes.push(miniCube);
     scene.add(miniCube._mesh);
-    console.log("ok")
   }
 }
 
