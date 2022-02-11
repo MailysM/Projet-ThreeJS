@@ -1,11 +1,10 @@
 
 import * as DEMINEUR from "../modules/demineur.js"
 
-//Déclaration des constantes
- const loader = new THREE.FontLoader();
+
 //Constantes
 //Variables Jeux
-const size = 10;
+const size = 5;
 const sizeMiniCube = .2;
 const pas = .5;
 const height = 1;
