@@ -29,18 +29,42 @@ Vous avez perdu \
 <button id = "bouton-retry">Rejouer</button>\
 </div>';
 
- const popup_alert_gagner = '<div id="alert" >\
-<div id = "alert-contenu" ></div>\
-Vous avez gagnez \
-<button id = "bouton-retry">Rejouer</button>\
-</div>';
+
 
  const numberMiniCubes = 50;
  const MaxNumberMiniCubes = numberMiniCubes*3;
  let maxSpeed = 0.5;
  let maxRotation = .1;
+let IdCubeSelected;
 
- let IdCubeSelected;
+
+ export function clearZero(cubes,i,j,miniCubes,sizeMiniCube,scene){
+    if(i>0){
+        selectCube(cubes[i-1][j],miniCubes,sizeMiniCube,scene,cubes)
+        if(j>0){
+
+            selectCube(cubes[i-1][j-1],miniCubes,sizeMiniCube,scene,cubes)
+            selectCube(cubes[i][j-1],miniCubes,sizeMiniCube,scene,cubes)
+        }
+        if(j<cubes.length-1){
+            selectCube(cubes[i-1][j+1],miniCubes,sizeMiniCube,scene,cubes)
+            selectCube(cubes[i][j+1],miniCubes,sizeMiniCube,scene,cubes)
+
+        }
+    }
+
+    if(i<cubes.length-1){
+
+        selectCube(cubes[i+1][j],miniCubes,sizeMiniCube,scene,cubes)
+        if(j>0){
+
+            selectCube(cubes[i+1][j-1],miniCubes,sizeMiniCube,scene,cubes)
+        }
+        if(j<cubes.length-1){
+            selectCube(cubes[i+1][j+1],miniCubes,sizeMiniCube,scene,cubes)
+        }
+    }
+ }
 
  export function setSpeedMiniCubes(newSpeed,newRotation){
      maxSpeed = newSpeed;
@@ -69,7 +93,7 @@ export function createMap(size,height,width,pas,cubes,holder,domEvents,miniCubes
             object.name = "cube";
             holder.add(object);
             cubes[i].push(new Cube(height,width,object, object.id));
-            domEvents.addEventListener(object, 'click', function(){selectCube(cubes[i][j],miniCubes,sizeMiniCube,scene)}, false)
+            domEvents.addEventListener(object, 'click', function(){selectCube(cubes[i][j],miniCubes,sizeMiniCube,scene,cubes)}, false)
             
         }
     }
@@ -92,8 +116,7 @@ export  function setBombsMap(size,cubes){
     while(compteur < totalNumberBombs){
         let randomI = getRandomInt(0,size-1);
         let randomJ = getRandomInt(0,size-1);
-        console.log(randomI,randomJ)
-        console.log(cubes)
+
         if(cubes[randomI][randomJ]._hasBomb==false){
             cubes[randomI][randomJ].setBomb(true);
             setNeighboorBomb(randomI,randomJ,cubes);
@@ -146,18 +169,24 @@ export function getCubeById(id,cubes){
 export function getIJByID(id,cubes){
     for(let i = 0; i<cubes.length ; i++){
         for(let j = 0 ; j<cubes.length; j++){
-            if(cubes[i][j].getId()== id) return i,j;
+            if(cubes[i][j].getId()== id){
+                return [i,j];
+            }
         }
     }
     return false;
 }
 
 
-export  function selectCube( cube ,miniCubes,sizeMiniCube,scene) {
+export  function selectCube( cube ,miniCubes,sizeMiniCube,scene,cubes) {
+    if(cube._isDisclose){
+        return;
+    }
     if(cube._hasBomb){
       createMiniCubes(cube,miniCubes,sizeMiniCube,scene);
       cube._mesh.material.dispose();
       cube._mesh.material = materialTransparent;
+      cube._isDisclose = true;
       //scene.remove(cube._mesh);
       if(!document.getElementById("alert")){
         $("body").append(popup_alert);
@@ -170,10 +199,11 @@ export  function selectCube( cube ,miniCubes,sizeMiniCube,scene) {
       });
     }
     else{
+        
         let textGeo;
         let textNumber = cube._numberNeighboorBomb.toString();
         let textWidth = cube._width;
-        let textHeight = cube._height/10
+        let textHeight = cube._height/10;
         loader.load( './ressources/font/droid_sans_mono_regular.typeface.json', function ( font ) {
 
             textGeo = new THREE.TextGeometry( textNumber, {
@@ -186,8 +216,20 @@ export  function selectCube( cube ,miniCubes,sizeMiniCube,scene) {
             cube._mesh.geometry.dispose();
             cube._mesh.geometry = textGeo;
             cube._mesh.name = "text";
-
+            
+        
         } );
+        
+        // if(textNumber==0 && !(cube._isDisclose)){
+            
+        //     let i = getIJByID(cube._id,cubes)[0];
+        //     let j = getIJByID(cube._id,cubes)[1];
+        //     clearZero(cubes,i,j,miniCubes,sizeMiniCube,scene)
+        // }
+        cube._isDisclose = true;
+        //console.log(cube._isDisclose);
+        
+       
     }
 }
 

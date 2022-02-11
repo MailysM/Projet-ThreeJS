@@ -4,7 +4,7 @@ import * as DEMINEUR from "../modules/demineur.js"
 
 //Constantes
 //Variables Jeux
-const size = 5;
+const size = 10;
 const sizeMiniCube = .2;
 const pas = .5;
 const height = 1;
@@ -41,6 +41,14 @@ const miniCubes = [];
 
  //DOM EVent
  const domEvents	= new THREEx.DomEvents(camera, renderer.domElement);
+
+
+ //HTML pour victoire
+ const popup_alert_gagner = '<div id="alert" >\
+ <div id = "alert-contenu" ></div>\
+ Vous avez gagnez \
+ <button id = "bouton-retry">Rejouer</button>\
+ </div>';
 
 
 //Fonctions pour le rendu
@@ -91,7 +99,7 @@ const miniCubes = [];
 
   //Initialisation
   document.addEventListener( 'mousemove', onPointerMove );
-  console.log(cubes)
+
   cubes = DEMINEUR.createMap(size,height,width,pas,cubes,holder,domEvents,miniCubes,sizeMiniCube,scene);
   
   DEMINEUR.setBombsMap(size,cubes);

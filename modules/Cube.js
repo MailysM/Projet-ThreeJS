@@ -7,6 +7,7 @@ class Cube {
         this._mesh = mesh;
         this._numberNeighboorBomb = 0;
         this._id = id;
+        this._isDisclose = false;
 	}
 
     setBomb(hasBomb){

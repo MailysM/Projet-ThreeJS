@@ -1,0 +1,87 @@
+html, body { 
+    margin: 0; 
+    padding: 0;
+     overflow: hidden; 
+    }
+
+
+button{
+    padding: 5px;
+    border-radius: 4px;
+    color: #240079;
+    background-color: #66cccc;
+    border: none;
+    animation-duration: 2s;
+}
+
+button:hover{
+    animation-name: jello-horizontal;
+    animation-timing-function: ease;
+    box-shadow: 0px 3px 5px rgba(0,0,0,.4);
+}
+
+/*//////////////////////////////////////////////////////////////////////*/
+/*///////////////Style de l'alert/////////////////////////////////////*/
+/*///////////////////////////////////////////////////////////////////*/
+/* The alert message box */
+#alert {
+    display : grid;
+    position: absolute;
+    top: 40%;
+    left: 45%;
+    padding: 20px;
+    background-color: #400094;
+    border-radius: 10px;
+    opacity : 1;
+    color: white;
+    z-index  : 60;
+  }
+
+  .alert-entree{
+    display : block;
+    animation: alert-entree 0.5s;
+    -webkit-animation: alert-entree 0.5s;
+  }
+  .alert-fin{
+    display : block;
+    animation: alert-fin 0.5s;
+    -webkit-animation: alert-fin 0.5s;
+    -webkit-animation-fill-mode: forwards;
+    animation-fill-mode: forwards;
+  }
+
+
+
+  #alert-contenu{
+      grid-row : 1;
+      grid-column: 1 / span 2 ;
+  }
+
+  #bouton-retry{
+      grid-row : 4;
+      grid-column : 1;
+      
+  }
+
+
+@import url(https://fonts.googleapis.com/css?family=PT+Sans:400,700,400italic);
+@-webkit-keyframes alert-entree {
+  0%{opacity: 0; margin-top: -20%;}
+  75%{margin-top: 5%;}
+  100%{opacity: 1;}
+}
+@keyframes alert-entree {
+  0%{opacity: 0; margin-top: -20%;}
+  75%{margin-top: 5%;}
+  100%{opacity: 1;}
+}
+@-webkit-keyframes alert-fin {
+  0%{opacity: 1;}
+  75%{opacity: 1; margin-top: -10%;}
+  100%{opacity: 0;margin-top: 40%;}
+}
+@keyframes alert-fin {
+  0%{opacity: 1;}
+  75%{opacity: 1; margin-top: -10%;}
+  100%{opacity: 0;margin-top: 40%;}
+}

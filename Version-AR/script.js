@@ -24,7 +24,7 @@ let INTERSECTED;
  const maxSpeed = 0.05;
  const maxRotation = .1;
 //Cubes
-const cubes = [[],[],[],[]];
+let cubes ;
 
 //MiniCubes pour la fin
 const miniCubes = [];
@@ -126,7 +126,7 @@ function init() {
 
     holder.visible = false;
 
-    DEMINEUR.createMap(size,height,width,pas,cubes,holder,domEvents,miniCubes,sizeMiniCube,scene);
+    cubes = DEMINEUR.createMap(size,height,width,pas,cubes,holder,domEvents,miniCubes,sizeMiniCube,scene);
     DEMINEUR.setBombsMap(size,cubes);
     scene.add(holder);
 
