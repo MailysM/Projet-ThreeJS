@@ -70,7 +70,6 @@ function onPointerTouch( event ) {
 
         this.addEventListener('select',onPointerTouch,false)
         this.removeEventListener('select', onSelect);
-        //addEventListenerCubes();
 
     }
 
@@ -100,7 +99,9 @@ function init() {
     container.appendChild( renderer.domElement );
 
     //ARButton
-    document.body.appendChild( ARButton.createButton( renderer, { requiredFeatures: [ 'hit-test' ] } ) );
+    let arButton = ARButton.createButton( renderer, { requiredFeatures: [ 'hit-test' ] } );
+    arButton.style.backgroundColor = "#240079";
+    document.body.appendChild( arButton );
     
 
     
