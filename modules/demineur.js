@@ -8,6 +8,13 @@ const materialPlateau = new THREE.MeshStandardMaterial({
     flatShading: true
 });
 
+const materialTransparent = new THREE.MeshStandardMaterial({
+    color: 0xf1d00a ,
+    flatShading: true,
+    transparent:true,
+    opacity:0.0
+});
+
 //Palettes couleur
 const palette = [0xb0c4de,0xb0e0e6,0xadd8e6,0x87ceeb,0x87cefa,0x00bfff,0x1e90ff,0x6495ed,0x4682b4]
 
@@ -29,6 +36,7 @@ Vous avez gagnez \
 </div>';
 
  const numberMiniCubes = 50;
+ const MaxNumberMiniCubes = numberMiniCubes*3;
  let maxSpeed = 0.5;
  let maxRotation = .1;
 
@@ -143,8 +151,8 @@ export function getIJByID(id,cubes){
 export  function selectCube( cube ,miniCubes,sizeMiniCube,scene) {
     if(cube._hasBomb){
       createMiniCubes(cube,miniCubes,sizeMiniCube,scene);
-      cube._mesh.geometry.dispose();
       cube._mesh.material.dispose();
+      cube._mesh.material = materialTransparent;
       //scene.remove(cube._mesh);
       if(!document.getElementById("alert")){
         $("body").append(popup_alert);
@@ -179,14 +187,23 @@ export  function selectCube( cube ,miniCubes,sizeMiniCube,scene) {
 }
 
 export  function createMiniCubes(cube,miniCubes,sizeMiniCube,scene){
-  for (var i = 0; i < numberMiniCubes; i++) {
-    const miniCube = new MiniCube(sizeMiniCube,maxSpeed,maxRotation,palette[Math.floor(Math.random()*palette.length)]);
-    miniCube._mesh.position.x = cube._mesh.position.x;
-    miniCube._mesh.position.y = cube._mesh.position.y;
-    miniCube._mesh.position.z = cube._mesh.position.z;
-    miniCubes.push(miniCube);
-    scene.add(miniCube._mesh);
-  }
+    if(miniCubes.length > MaxNumberMiniCubes){
+        miniCubes.splice(miniCubes[0],numberMiniCubes);
+        for(let i = 0; i<numberMiniCubes ; i++){
+            miniCubes[i]._mesh.material.dispose();
+            miniCubes[i]._mesh.material = materialTransparent;
+        }
+        
+    }
+    for (let i = 0; i < numberMiniCubes; i++) {
+        const miniCube = new MiniCube(sizeMiniCube,maxSpeed,maxRotation,palette[Math.floor(Math.random()*palette.length)]);
+        miniCube._mesh.position.x = cube._mesh.position.x;
+        miniCube._mesh.position.y = cube._mesh.position.y;
+        miniCube._mesh.position.z = cube._mesh.position.z;
+        miniCubes.push(miniCube);
+        scene.add(miniCube._mesh);
+      }
+  
 }
 
 export  function testGagner(cubes){
