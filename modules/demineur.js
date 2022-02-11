@@ -186,7 +186,7 @@ export  function selectCube( cube ,miniCubes,sizeMiniCube,scene,cubes) {
       createMiniCubes(cube,miniCubes,sizeMiniCube,scene);
       cube._mesh.material.dispose();
       cube._mesh.material = materialTransparent;
-      cube._isDisclose = true;
+      //cube._isDisclose = true;
       //scene.remove(cube._mesh);
       if(!document.getElementById("alert")){
         $("body").append(popup_alert);
